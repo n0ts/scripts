@@ -32,9 +32,10 @@ if [ $RETVAL -ne 0 ]; then
         if [ -n "$PACKAGE" ]; then
             rpm -qi "$PACKAGE" > /dev/null
             if [ $? -ne 0 ]; then
+                echo "Install package - $PACKAGE"
                 sudo yum -y install "$PACKAGE"
                 if [ $? -ne 0 ]; then
-                    "Install package error. - $PACKAGE"
+                    echo "Install package error - $PACKAGE"
                     exit 1
                 fi
             fi
