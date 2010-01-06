@@ -4,5 +4,5 @@ function get_cmd() {
 }
 for cmd in `get_cmd`; do
   sudo /sbin/chkconfig $cmd off
-  /etc/init.d/$cmd stop
+  sudo /etc/init.d/$cmd stop
 done
