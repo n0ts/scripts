@@ -1,0 +1,14 @@
+#!/bin/sh
+
+function delete_log()
+{
+    find $1 -name "*_log.*" -type f -mtime +30  -exec rm -f {} \;
+}
+
+
+DIRS=("/var/log/httpd")
+d=0
+for d in ${DIRS[@]};do
+    delete_log $d
+done
+
