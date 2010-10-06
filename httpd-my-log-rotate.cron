@@ -1,0 +1,56 @@
+#!/bin/sh
+
+USER=apache
+MY_DIR=
+COMPRESS_CMD="/usr/bin/pbzip2 -4"
+COMPRESS_EXT="bz2"
+LOG_EXT_NOW=`date +%Y%m%d%H`
+LOG_EXT_1HOUR_AGO=`date --date '1hours ago' +%Y%m%d%H`
+MONTH_OFFSET="5-6"
+DELETE_LOG_EXPIRE=365
+
+function compress_log()
+{
+    ARCHIVES_DIR=$1/archives
+    if [ ! -d $ARCHIVES_DIR ]; then
+        echo sudo -u $USER mkdir $ARCHIVES_DIR
+    fi
+
+    for i in `find $1 -maxdepth 1 -not -name "*.$COMPRESS_EXT" -not -name "*.$LOG_EXT_NOW" -not -name "*.LOG_EXT_1HOUR_AGO" -name "*_log.2*" -type f -print`
+    do
+        if [ -f $i ]; then
+            echo sudo -u $USER $COMPRESS_CMD $i
+        fi
+
+        YEAR=`echo $i | sed -e 's/.*\.//' | cut -c 1-4`
+        if [ ! -d $ARCHIVES_DIR/$YEAR ]; then
+            echo sudo -u $USER mkdir $ARCHIVES_DIR/$YEAR
+        fi
+        MONTH=`echo $i | sed -e 's/.*\.//' | cut -c $MONTH_OFFSET`
+        if [ ! -d $ARCHIVES_DIR/$YEAR/$MONTH ]; then
+            echo mkdir $ARCHIVES_DIR/$YEAR/$MONTH
+        fi
+
+        echo mv -b $i.$COMPRESS_EXT $ARCHIVES_DIR/$YEAR/$MONTH/
+    done
+}
+
+function delete_log()
+{
+    echo find $1 -name "*_log*.$COMPRESS_EXT" -type f -mtime +$DELETE_LOG_EXPIRE -exec rm -f {} \;
+}
+
+
+if [ ! -x $ZIP ]; then
+    echo "Could not fined - $ZIP"
+    exit 1
+fi
+
+
+DIRS=($MY_DIR)
+d=0
+for d in ${DIRS[@]};do
+    compress_log $d
+    delete_log $d
+done
+
